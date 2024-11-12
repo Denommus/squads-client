@@ -1,0 +1,13 @@
+[package]
+name = "squads-client"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+anchor-client = { version = "0.30.1", features = ["async"] }
+solana-client = "1.18.26"
+solana-program = "1.18.26"
+solana-sdk = "1.18.26"
+spl-memo = { version = "4.0.0", features = ["no-entrypoint"] }
+squads-multisig-program = { git = "https://github.com/Denommus/squads-v4.git", rev = "421dd8afa065213242055a5a28d873190fe85c8b", features = ["no-entrypoint"] }
+tokio = { version = "1.41.1", features = ["full"] }
