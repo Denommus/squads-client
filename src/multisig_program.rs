@@ -1,16 +1,12 @@
 use std::{error::Error, sync::Arc};
 
-use anchor_client::{
-    anchor_lang::{AnchorSerialize, InstructionData},
-    Client, Program,
-};
+use anchor_client::{anchor_lang::AnchorSerialize, Client, Program};
 use solana_sdk::{
     instruction::Instruction, message::Message, pubkey::Pubkey, signature::Keypair, signer::Signer,
     system_program,
 };
 use squads_multisig_program::{
-    instruction::VaultTransactionCreate, Multisig, MultisigCompiledInstruction,
-    VaultTransactionCreateArgs, VaultTransactionMessage,
+    instruction::VaultTransactionCreate, Multisig, VaultTransactionCreateArgs,
 };
 
 pub struct MultisigProgram {
