@@ -4751,7 +4751,7 @@ dependencies = [
 [[package]]
 name = "squads-multisig-program"
 version = "2.0.0"
-source = "git+https://github.com/Denommus/squads-v4.git?rev=421dd8afa065213242055a5a28d873190fe85c8b#421dd8afa065213242055a5a28d873190fe85c8b"
+source = "git+https://github.com/Denommus/squads-v4.git?rev=5ee11b9c6b149c34d0c184b1e45df65ecee32cdd#5ee11b9c6b149c34d0c184b1e45df65ecee32cdd"
 dependencies = [
  "anchor-lang",
  "anchor-spl",
