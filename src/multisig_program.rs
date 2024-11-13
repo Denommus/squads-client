@@ -68,7 +68,8 @@ impl MultisigProgram {
             rent_payer: payer.pubkey(),
         };
 
-        self.program
+        let signature = self
+            .program
             .request()
             .signer(&proposer)
             .signer(&payer)
@@ -76,6 +77,8 @@ impl MultisigProgram {
             .args(create_transaction)
             .send()
             .await?;
+
+        println!("Signature: {}", signature);
 
         Ok(())
     }
