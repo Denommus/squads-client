@@ -1,13 +1,15 @@
 use std::{error::Error, sync::Arc};
 
-use anchor_client::{anchor_lang::AnchorSerialize, Client, Program};
+use anchor_client::{Client, Program};
 use solana_sdk::{
-    instruction::Instruction, message::Message, pubkey::Pubkey, signature::Keypair, signer::Signer,
-    system_program,
+    instruction::Instruction, pubkey::Pubkey, signature::Keypair, signer::Signer, system_program,
 };
-use squads_multisig_program::{
-    instruction::VaultTransactionCreate, Multisig, VaultTransactionCreateArgs,
+use squads_multisig::{
+    client::{vault_transaction_create, VaultTransactionCreateAccounts},
+    pda::{get_transaction_pda, get_vault_pda},
+    vault_transaction::VaultTransactionMessageExt,
 };
+use squads_multisig_program::{Multisig, TransactionMessage};
 
 pub struct MultisigProgram {
     program: Program<Arc<Keypair>>,
@@ -40,27 +42,15 @@ impl MultisigProgram {
         instructions: &[Instruction],
         transaction_index: u64,
     ) -> Result<(), Box<dyn Error>> {
-        let (transaction_account_pda, _transaction_account_bump) = Pubkey::find_program_address(
-            &[
-                "multisig".as_bytes(),
-                self.multisig.as_ref(),
-                "transaction".as_bytes(),
-                &transaction_index.to_le_bytes(),
-            ],
-            &self.program.id(),
-        );
-        let transaction_message = Message::new(instructions, Some(&payer.pubkey()));
+        let vault_index = 0;
 
-        let create_transaction = VaultTransactionCreate {
-            args: VaultTransactionCreateArgs {
-                vault_index: 0,
-                ephemeral_signers: 0,
-                transaction_message: transaction_message.serialize().try_to_vec()?,
-                memo: None,
-            },
-        };
+        let vault_pda = get_vault_pda(&self.multisig, vault_index, Some(&self.program.id())).0;
+        let transaction_account_pda =
+            get_transaction_pda(&self.multisig, transaction_index, Some(&self.program.id())).0;
 
-        let accounts = squads_multisig_program::accounts::VaultTransactionCreate {
+        let transaction_message = TransactionMessage::try_compile(&vault_pda, instructions, &[])?;
+
+        let accounts = VaultTransactionCreateAccounts {
             multisig: self.multisig,
             transaction: transaction_account_pda,
             system_program: system_program::ID,
@@ -68,13 +58,21 @@ impl MultisigProgram {
             rent_payer: payer.pubkey(),
         };
 
+        let ix = vault_transaction_create(
+            accounts,
+            vault_index,
+            0,
+            &transaction_message,
+            None,
+            Some(self.program.id()),
+        );
+
         let signature = self
             .program
             .request()
             .signer(&proposer)
             .signer(&payer)
-            .accounts(accounts)
-            .args(create_transaction)
+            .instruction(ix)
             .send()
             .await?;
 
