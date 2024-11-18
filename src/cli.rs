@@ -30,6 +30,13 @@ pub enum Command {
         #[arg(help = "The index of the member that is doing the approval")]
         member_index: usize,
     },
+    #[command(about = "Executes a transaction")]
+    ExecuteVaultTransaction {
+        #[arg(help = "The message that is going to be memoed by spl_memo")]
+        message: String,
+        #[arg(help = "The transaction index that should be executed")]
+        transaction_index: u64,
+    },
 }
 
 impl Cli {
@@ -64,6 +71,20 @@ impl Cli {
                     .approve_proposal(&members[member_index], rent_payer, transaction_index)
                     .await?
             }
+            Command::ExecuteVaultTransaction {
+                ref message,
+                transaction_index,
+            } => {
+                execute_transaction(
+                    multisig_program,
+                    members,
+                    rent_payer,
+                    instruction_payer,
+                    message,
+                    transaction_index,
+                )
+                .await?;
+            }
         }
 
         Ok(())
@@ -84,6 +105,30 @@ async fn create_transaction(
     println!("Creating transaction");
     multisig_program
         .create_transaction(&members[0], rent_payer, &[ix], transaction_index)
+        .await?;
+
+    Ok(())
+}
+
+async fn execute_transaction(
+    multisig_program: &MultisigProgram,
+    members: &[Keypair],
+    rent_payer: &Keypair,
+    instruction_payer: &Keypair,
+    message: &str,
+    transaction_index: u64,
+) -> Result<(), Box<dyn Error>> {
+    let ix = spl_memo::build_memo(message.as_bytes(), &[&instruction_payer.pubkey()]);
+
+    println!("Executing transaction");
+    multisig_program
+        .execute_transaction(
+            &members[0],
+            rent_payer,
+            instruction_payer,
+            transaction_index,
+            &[ix],
+        )
         .await?;
 
     Ok(())

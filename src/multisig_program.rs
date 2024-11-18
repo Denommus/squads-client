@@ -6,7 +6,8 @@ use solana_sdk::{
 };
 use squads_multisig::{
     client::{
-        proposal_approve, proposal_create, vault_transaction_create, VaultTransactionCreateAccounts,
+        proposal_approve, proposal_create, vault_transaction_create, vault_transaction_execute,
+        VaultTransactionCreateAccounts,
     },
     pda::{get_proposal_pda, get_transaction_pda, get_vault_pda},
     vault_transaction::VaultTransactionMessageExt,
@@ -149,6 +150,53 @@ impl MultisigProgram {
             .request()
             .signer(&approver)
             .signer(&payer)
+            .instruction(ix)
+            .send()
+            .await?;
+
+        println!("Signature: {}", signature);
+
+        Ok(())
+    }
+
+    pub async fn execute_transaction(
+        &self,
+        executor: &Keypair,
+        payer: &Keypair,
+        instruction_payer: &Keypair,
+        transaction_index: u64,
+        instructions: &[Instruction],
+    ) -> Result<(), Box<dyn Error>> {
+        let vault_index = 0;
+
+        let vault_pda = get_vault_pda(&self.multisig, vault_index, Some(&self.program.id())).0;
+        let proposal_pda =
+            get_proposal_pda(&self.multisig, transaction_index, Some(&self.program.id())).0;
+        let transaction_account_pda =
+            get_transaction_pda(&self.multisig, transaction_index, Some(&self.program.id())).0;
+
+        let message = TransactionMessage::try_compile(&vault_pda, instructions, &[])?;
+
+        let ix = vault_transaction_execute(
+            squads_multisig::client::VaultTransactionExecuteAccounts {
+                multisig: self.multisig,
+                proposal: proposal_pda,
+                transaction: transaction_account_pda,
+                member: executor.pubkey(),
+            },
+            vault_index,
+            0,
+            &message,
+            &[],
+            Some(self.program.id()),
+        )?;
+
+        let signature = self
+            .program
+            .request()
+            .signer(&executor)
+            .signer(&payer)
+            .signer(&instruction_payer)
             .instruction(ix)
             .send()
             .await?;
