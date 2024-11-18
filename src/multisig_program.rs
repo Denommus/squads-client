@@ -5,11 +5,11 @@ use solana_sdk::{
     instruction::Instruction, pubkey::Pubkey, signature::Keypair, signer::Signer, system_program,
 };
 use squads_multisig::{
-    client::{vault_transaction_create, VaultTransactionCreateAccounts},
-    pda::{get_transaction_pda, get_vault_pda},
+    client::{proposal_create, vault_transaction_create, VaultTransactionCreateAccounts},
+    pda::{get_proposal_pda, get_transaction_pda, get_vault_pda},
     vault_transaction::VaultTransactionMessageExt,
 };
-use squads_multisig_program::{Multisig, TransactionMessage};
+use squads_multisig_program::{Multisig, ProposalCreateArgs, TransactionMessage};
 
 pub struct MultisigProgram {
     program: Program<Arc<Keypair>>,
@@ -64,6 +64,46 @@ impl MultisigProgram {
             0,
             &transaction_message,
             None,
+            Some(self.program.id()),
+        );
+
+        let signature = self
+            .program
+            .request()
+            .signer(&proposer)
+            .signer(&payer)
+            .instruction(ix)
+            .send()
+            .await?;
+
+        println!("Signature: {}", signature);
+
+        Ok(())
+    }
+
+    pub async fn create_proposal(
+        &self,
+        proposer: &Keypair,
+        payer: &Keypair,
+        transaction_index: u64,
+    ) -> Result<(), Box<dyn Error>> {
+        let proposal =
+            get_proposal_pda(&self.multisig, transaction_index, Some(&self.program.id())).0;
+
+        println!("Proposal: {}", proposal);
+
+        let ix = proposal_create(
+            squads_multisig::client::ProposalCreateAccounts {
+                multisig: self.multisig,
+                proposal,
+                creator: proposer.pubkey(),
+                rent_payer: payer.pubkey(),
+                system_program: system_program::ID,
+            },
+            ProposalCreateArgs {
+                transaction_index,
+                draft: false,
+            },
             Some(self.program.id()),
         );
 
