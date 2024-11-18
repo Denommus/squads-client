@@ -13,9 +13,9 @@ pub struct Cli {
 
 #[derive(Subcommand)]
 pub enum Command {
-    #[command()]
+    #[command(about = "Creates a vault transaction")]
     CreateVaultTransaction {
-        #[arg()]
+        #[arg(help = "The message that is going to be memoed by spl_memo")]
         message: String,
     },
 }
