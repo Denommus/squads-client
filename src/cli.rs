@@ -23,6 +23,13 @@ pub enum Command {
         #[arg(help = "The transaction index that should be associated with this proposal")]
         transaction_index: u64,
     },
+    #[command(about = "Approves a proposal")]
+    ApproveProposal {
+        #[arg(help = "The transaction index that is associated with this proposal")]
+        transaction_index: u64,
+        #[arg(help = "The index of the member that is doing the approval")]
+        member_index: usize,
+    },
 }
 
 impl Cli {
@@ -47,6 +54,14 @@ impl Cli {
             Command::CreateProposal { transaction_index } => {
                 multisig_program
                     .create_proposal(&members[0], rent_payer, transaction_index)
+                    .await?
+            }
+            Command::ApproveProposal {
+                transaction_index,
+                member_index,
+            } => {
+                multisig_program
+                    .approve_proposal(&members[member_index], rent_payer, transaction_index)
                     .await?
             }
         }

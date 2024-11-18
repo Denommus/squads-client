@@ -5,11 +5,13 @@ use solana_sdk::{
     instruction::Instruction, pubkey::Pubkey, signature::Keypair, signer::Signer, system_program,
 };
 use squads_multisig::{
-    client::{proposal_create, vault_transaction_create, VaultTransactionCreateAccounts},
+    client::{
+        proposal_approve, proposal_create, vault_transaction_create, VaultTransactionCreateAccounts,
+    },
     pda::{get_proposal_pda, get_transaction_pda, get_vault_pda},
     vault_transaction::VaultTransactionMessageExt,
 };
-use squads_multisig_program::{Multisig, ProposalCreateArgs, TransactionMessage};
+use squads_multisig_program::{Multisig, ProposalCreateArgs, ProposalVoteArgs, TransactionMessage};
 
 pub struct MultisigProgram {
     program: Program<Arc<Keypair>>,
@@ -87,15 +89,15 @@ impl MultisigProgram {
         payer: &Keypair,
         transaction_index: u64,
     ) -> Result<(), Box<dyn Error>> {
-        let proposal =
+        let proposal_pda =
             get_proposal_pda(&self.multisig, transaction_index, Some(&self.program.id())).0;
 
-        println!("Proposal: {}", proposal);
+        println!("Proposal: {}", proposal_pda);
 
         let ix = proposal_create(
             squads_multisig::client::ProposalCreateAccounts {
                 multisig: self.multisig,
-                proposal,
+                proposal: proposal_pda,
                 creator: proposer.pubkey(),
                 rent_payer: payer.pubkey(),
                 system_program: system_program::ID,
@@ -111,6 +113,41 @@ impl MultisigProgram {
             .program
             .request()
             .signer(&proposer)
+            .signer(&payer)
+            .instruction(ix)
+            .send()
+            .await?;
+
+        println!("Signature: {}", signature);
+
+        Ok(())
+    }
+
+    pub async fn approve_proposal(
+        &self,
+        approver: &Keypair,
+        payer: &Keypair,
+        transaction_index: u64,
+    ) -> Result<(), Box<dyn Error>> {
+        let proposal_pda =
+            get_proposal_pda(&self.multisig, transaction_index, Some(&self.program.id())).0;
+
+        println!("Proposal: {}", proposal_pda);
+
+        let ix = proposal_approve(
+            squads_multisig::client::ProposalVoteAccounts {
+                multisig: self.multisig,
+                member: approver.pubkey(),
+                proposal: proposal_pda,
+            },
+            ProposalVoteArgs { memo: None },
+            Some(self.program.id()),
+        );
+
+        let signature = self
+            .program
+            .request()
+            .signer(&approver)
             .signer(&payer)
             .instruction(ix)
             .send()
