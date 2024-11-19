@@ -1,6 +1,7 @@
 use std::error::Error;
 
 use clap::{Parser, Subcommand};
+use solana_client::nonblocking::rpc_client::RpcClient;
 use solana_sdk::{signature::Keypair, signer::Signer};
 
 use crate::multisig_program::MultisigProgram;
@@ -37,6 +38,8 @@ pub enum Command {
         #[arg(help = "The transaction index that should be executed")]
         transaction_index: u64,
     },
+    #[command(about = "Checks the memos from the instruction payer")]
+    CheckMemos,
 }
 
 impl Cli {
@@ -46,6 +49,7 @@ impl Cli {
         members: &[Keypair],
         rent_payer: &Keypair,
         instruction_payer: &Keypair,
+        rpc_client: &RpcClient,
     ) -> Result<(), Box<dyn Error>> {
         match self.command {
             Command::CreateVaultTransaction { ref message } => {
@@ -84,6 +88,13 @@ impl Cli {
                     transaction_index,
                 )
                 .await?;
+            }
+            Command::CheckMemos => {
+                let instruction_payer_pubkey = instruction_payer.pubkey();
+                let signatures = rpc_client
+                    .get_signatures_for_address(&instruction_payer_pubkey)
+                    .await?;
+                println!("Signatures: {:?}", signatures);
             }
         }
 

@@ -9,6 +9,7 @@ use clap::Parser;
 use cli::Cli;
 use config::ClientConfig;
 use multisig_program::MultisigProgram;
+use solana_client::nonblocking::rpc_client::RpcClient;
 use solana_sdk::{signature::Keypair, signer::EncodableKey};
 
 #[tokio::main]
@@ -30,7 +31,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     let cluster = Cluster::Localnet;
 
-    // let rpc_client = RpcClient::new(cluster.url().to_string());
+    let rpc_client = RpcClient::new(cluster.url().to_string());
 
     let client = Client::new(cluster, rent_payer.clone());
 
@@ -40,8 +41,14 @@ async fn main() -> Result<(), Box<dyn Error>> {
         config.multisig.into(),
     )?;
 
-    cli.dispatch(&multisig_program, &members, &rent_payer, &instruction_payer)
-        .await?;
+    cli.dispatch(
+        &multisig_program,
+        &members,
+        &rent_payer,
+        &instruction_payer,
+        &rpc_client,
+    )
+    .await?;
 
     println!("All good!");
 
