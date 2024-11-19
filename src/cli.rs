@@ -22,11 +22,6 @@ pub enum Command {
         #[arg(help = "The message that is going to be memoed by spl_memo")]
         message: String,
     },
-    #[command(about = "Creates a proposal")]
-    CreateProposal {
-        #[arg(help = "The transaction index that should be associated with this proposal")]
-        transaction_index: u64,
-    },
     #[command(about = "Approves a proposal")]
     ApproveProposal {
         #[arg(help = "The transaction index that is associated with this proposal")]
@@ -66,11 +61,6 @@ impl Cli {
                     message,
                 )
                 .await?
-            }
-            Command::CreateProposal { transaction_index } => {
-                multisig_program
-                    .create_proposal(&members[0], rent_payer, transaction_index)
-                    .await?
             }
             Command::ApproveProposal {
                 transaction_index,
@@ -135,7 +125,7 @@ async fn create_transaction(
 
     println!("Creating transaction");
     multisig_program
-        .create_transaction(&members[0], rent_payer, &[ix], transaction_index)
+        .create_transaction_and_proposal(&members[0], rent_payer, &[ix], transaction_index)
         .await?;
 
     Ok(())

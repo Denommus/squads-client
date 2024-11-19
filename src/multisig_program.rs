@@ -37,7 +37,7 @@ impl MultisigProgram {
         Ok(self.get_multisig_account().await?.transaction_index)
     }
 
-    pub async fn create_transaction(
+    pub async fn create_transaction_and_proposal(
         &self,
         proposer: &Keypair,
         payer: &Keypair,
@@ -49,6 +49,8 @@ impl MultisigProgram {
         let vault_pda = get_vault_pda(&self.multisig, vault_index, Some(&self.program.id())).0;
         let transaction_account_pda =
             get_transaction_pda(&self.multisig, transaction_index, Some(&self.program.id())).0;
+        let proposal_pda =
+            get_proposal_pda(&self.multisig, transaction_index, Some(&self.program.id())).0;
 
         let transaction_message = TransactionMessage::try_compile(&vault_pda, instructions, &[])?;
 
@@ -60,7 +62,7 @@ impl MultisigProgram {
             rent_payer: payer.pubkey(),
         };
 
-        let ix = vault_transaction_create(
+        let vault_tx_ix = vault_transaction_create(
             accounts,
             vault_index,
             0,
@@ -69,32 +71,7 @@ impl MultisigProgram {
             Some(self.program.id()),
         );
 
-        let signature = self
-            .program
-            .request()
-            .signer(&proposer)
-            .signer(&payer)
-            .instruction(ix)
-            .send()
-            .await?;
-
-        println!("Signature: {}", signature);
-
-        Ok(())
-    }
-
-    pub async fn create_proposal(
-        &self,
-        proposer: &Keypair,
-        payer: &Keypair,
-        transaction_index: u64,
-    ) -> Result<(), Box<dyn Error>> {
-        let proposal_pda =
-            get_proposal_pda(&self.multisig, transaction_index, Some(&self.program.id())).0;
-
-        println!("Proposal: {}", proposal_pda);
-
-        let ix = proposal_create(
+        let proposal_ix = proposal_create(
             squads_multisig::client::ProposalCreateAccounts {
                 multisig: self.multisig,
                 proposal: proposal_pda,
@@ -114,7 +91,8 @@ impl MultisigProgram {
             .request()
             .signer(&proposer)
             .signer(&payer)
-            .instruction(ix)
+            .instruction(vault_tx_ix)
+            .instruction(proposal_ix)
             .send()
             .await?;
 
