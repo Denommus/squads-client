@@ -1,8 +1,11 @@
-use std::error::Error;
+use std::{error::Error, str::FromStr};
 
 use clap::{Parser, Subcommand};
 use solana_client::nonblocking::rpc_client::RpcClient;
-use solana_sdk::{signature::Keypair, signer::Signer};
+use solana_sdk::{
+    signature::{Keypair, Signature},
+    signer::Signer,
+};
 
 use crate::multisig_program::MultisigProgram;
 
@@ -40,6 +43,8 @@ pub enum Command {
     },
     #[command(about = "Checks the memos from the instruction payer")]
     CheckMemos,
+    #[command(about = "Gets the last transaction index")]
+    TransactionIndex,
 }
 
 impl Cli {
@@ -95,6 +100,21 @@ impl Cli {
                     .get_signatures_for_address(&instruction_payer_pubkey)
                     .await?;
                 println!("Signatures: {:?}", signatures);
+
+                println!("Signatures length: {}", signatures.len());
+                for signature in signatures {
+                    let tx = rpc_client
+                        .get_transaction(
+                            &Signature::from_str(&signature.signature)?,
+                            solana_transaction_status::UiTransactionEncoding::Json,
+                        )
+                        .await?;
+                    println!("Transaction: {:?}", tx);
+                }
+            }
+            Command::TransactionIndex => {
+                let transaction_index = multisig_program.get_current_transaction_index().await?;
+                println!("Transaction index: {transaction_index}");
             }
         }
 
