@@ -7,7 +7,6 @@ use solana_sdk::{
 use squads_multisig::{
     client::{
         proposal_approve, proposal_create, vault_transaction_create, vault_transaction_execute,
-        VaultTransactionCreateAccounts,
     },
     pda::{get_proposal_pda, get_transaction_pda, get_vault_pda},
     vault_transaction::VaultTransactionMessageExt,
@@ -53,7 +52,7 @@ impl MultisigProgram {
 
         let transaction_message = TransactionMessage::try_compile(&vault_pda, instructions, &[])?;
 
-        let accounts = VaultTransactionCreateAccounts {
+        let accounts = squads_multisig::client::VaultTransactionCreateAccounts {
             multisig: self.multisig,
             transaction: transaction_account_pda,
             system_program: system_program::ID,
