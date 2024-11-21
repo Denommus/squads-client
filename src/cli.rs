@@ -85,9 +85,9 @@ impl Cli {
                 .await?;
             }
             Command::CheckMemos => {
-                let instruction_payer_pubkey = instruction_payer.pubkey();
+                let rent_payer_pubkey = rent_payer.pubkey();
                 let signatures = rpc_client
-                    .get_signatures_for_address(&instruction_payer_pubkey)
+                    .get_signatures_for_address(&rent_payer_pubkey)
                     .await?;
                 println!("Signatures: {:?}", signatures);
 

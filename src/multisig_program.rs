@@ -4,6 +4,7 @@ use anchor_client::{Client, Program};
 use solana_sdk::{
     instruction::Instruction, pubkey::Pubkey, signature::Keypair, signer::Signer, system_program,
 };
+use spl_memo::build_memo;
 use squads_multisig::{
     client::{
         proposal_approve, proposal_create, vault_transaction_create, vault_transaction_execute,
@@ -62,12 +63,17 @@ impl MultisigProgram {
             rent_payer: payer.pubkey(),
         };
 
+        let memo_tx = build_memo(
+            format!("Transaction index: {transaction_index}").as_bytes(),
+            &[&payer.pubkey()],
+        );
+
         let vault_tx_ix = vault_transaction_create(
             accounts,
             vault_index,
             0,
             &transaction_message,
-            Some(format!("Transaction index: {}", transaction_index)),
+            None,
             Some(self.program.id()),
         );
 
@@ -91,6 +97,7 @@ impl MultisigProgram {
             .request()
             .signer(&proposer)
             .signer(&payer)
+            .instruction(memo_tx)
             .instruction(vault_tx_ix)
             .instruction(proposal_ix)
             .send()
