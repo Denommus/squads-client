@@ -37,9 +37,16 @@ pub enum Command {
         transaction_index: u64,
     },
     #[command(about = "Checks the memos from the instruction payer")]
-    CheckMemos,
+    CheckMemos { kind: MemoKind },
     #[command(about = "Gets the last transaction index")]
     TransactionIndex,
+}
+
+#[derive(clap::ValueEnum, Default, Clone, Copy)]
+pub enum MemoKind {
+    #[default]
+    RentPayer,
+    InstructionPayer,
 }
 
 impl Cli {
@@ -84,11 +91,12 @@ impl Cli {
                 )
                 .await?;
             }
-            Command::CheckMemos => {
-                let rent_payer_pubkey = rent_payer.pubkey();
-                let signatures = rpc_client
-                    .get_signatures_for_address(&rent_payer_pubkey)
-                    .await?;
+            Command::CheckMemos { kind } => {
+                let payer_pubkey = match kind {
+                    MemoKind::InstructionPayer => instruction_payer.pubkey(),
+                    MemoKind::RentPayer => rent_payer.pubkey(),
+                };
+                let signatures = rpc_client.get_signatures_for_address(&payer_pubkey).await?;
                 println!("Signatures: {:?}", signatures);
 
                 println!("Signatures length: {}", signatures.len());
