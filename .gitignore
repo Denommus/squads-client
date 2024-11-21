@@ -2,3 +2,4 @@
 result
 .direnv/
 config.toml
+test-ledger/
