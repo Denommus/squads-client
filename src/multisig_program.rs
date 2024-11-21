@@ -67,7 +67,7 @@ impl MultisigProgram {
             vault_index,
             0,
             &transaction_message,
-            None,
+            Some(format!("Transaction index: {}", transaction_index)),
             Some(self.program.id()),
         );
 
