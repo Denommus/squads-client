@@ -37,7 +37,10 @@ pub enum Command {
         transaction_index: u64,
     },
     #[command(about = "Checks the memos from the instruction payer")]
-    CheckMemos { kind: MemoKind },
+    CheckMemos {
+        #[arg(help = "The kind of payer that you want to check the memos")]
+        kind: MemoKind,
+    },
     #[command(about = "Gets the last transaction index")]
     TransactionIndex,
 }
