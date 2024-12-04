@@ -10,9 +10,9 @@ use squads_multisig::{
         proposal_approve, proposal_create, vault_transaction_create, vault_transaction_execute,
     },
     pda::{get_proposal_pda, get_transaction_pda, get_vault_pda},
+    squads_multisig_program::{Multisig, ProposalCreateArgs, ProposalVoteArgs, TransactionMessage},
     vault_transaction::VaultTransactionMessageExt,
 };
-use squads_multisig_program::{Multisig, ProposalCreateArgs, ProposalVoteArgs, TransactionMessage};
 
 pub struct MultisigProgram {
     program: Program<Arc<Keypair>>,

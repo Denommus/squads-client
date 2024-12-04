@@ -13,7 +13,6 @@ solana-program = "1.18.26"
 solana-sdk = "1.18.26"
 solana-transaction-status = "1.18.26"
 spl-memo = { version = "4.0.0", features = ["no-entrypoint"] }
-squads-multisig = { git = "https://github.com/Denommus/squads-v4.git", rev = "5ee11b9c6b149c34d0c184b1e45df65ecee32cdd" }
-squads-multisig-program = { git = "https://github.com/Denommus/squads-v4.git", rev = "5ee11b9c6b149c34d0c184b1e45df65ecee32cdd", features = ["no-entrypoint"] }
+squads-multisig = { git = "https://github.com/Denommus/squads-v4.git", rev = "60d92efa1b0490cb70329cbac0165e550d73a9c7" }
 tokio = { version = "1.41.1", features = ["full"] }
 toml = "0.8.19"
