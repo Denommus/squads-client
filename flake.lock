@@ -59,7 +59,8 @@
         "flake-utils": "flake-utils",
         "naersk": "naersk",
         "nixpkgs": "nixpkgs",
-        "rust-overlay": "rust-overlay"
+        "rust-overlay": "rust-overlay",
+        "squads-multisig-client": "squads-multisig-client"
       }
     },
     "rust-overlay": {
@@ -79,6 +80,35 @@
       "original": {
         "owner": "oxalica",
         "repo": "rust-overlay",
+        "type": "github"
+      }
+    },
+    "squads-multisig-client": {
+      "inputs": {
+        "flake-utils": [
+          "flake-utils"
+        ],
+        "naersk": [
+          "naersk"
+        ],
+        "nixpkgs": [
+          "nixpkgs"
+        ],
+        "rust-overlay": [
+          "rust-overlay"
+        ]
+      },
+      "locked": {
+        "lastModified": 1734456147,
+        "narHash": "sha256-xVtdJWdIxVIWEIdLXcGNgKT74JSpFMVICNgIEoyLPWo=",
+        "owner": "Denommus",
+        "repo": "squads-multisig-client",
+        "rev": "e462bcda75b74fbd11cd80c101773e7815c5f913",
+        "type": "github"
+      },
+      "original": {
+        "owner": "Denommus",
+        "repo": "squads-multisig-client",
         "type": "github"
       }
     },

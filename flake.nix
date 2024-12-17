@@ -6,6 +6,11 @@
     rust-overlay.inputs.nixpkgs.follows = "nixpkgs";
     naersk.url = "github:nix-community/naersk";
     naersk.inputs.nixpkgs.follows = "nixpkgs";
+    squads-multisig-client.url = "github:Denommus/squads-multisig-client";
+    squads-multisig-client.inputs.nixpkgs.follows = "nixpkgs";
+    squads-multisig-client.inputs.flake-utils.follows = "flake-utils";
+    squads-multisig-client.inputs.naersk.follows = "naersk";
+    squads-multisig-client.inputs.rust-overlay.follows = "rust-overlay";
   };
 
   outputs =
@@ -14,6 +19,7 @@
       flake-utils,
       rust-overlay,
       naersk,
+      squads-multisig-client,
       ...
     }:
     flake-utils.lib.eachDefaultSystem (
@@ -30,6 +36,10 @@
 
         shell = pkgs.mkShell {
           inputsFrom = [ squads-client ];
+
+          packages = [
+            squads-multisig-client.packages.${system}.default
+          ];
         };
       in
       {
