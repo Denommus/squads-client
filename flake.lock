@@ -99,11 +99,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1734530568,
-        "narHash": "sha256-J+35NqyggnckegqEwv1o9XnUogmqGXxAygiTk4YexkA=",
+        "lastModified": 1734547506,
+        "narHash": "sha256-qxYlhn25FJVgFZdjX1BD7B9Zss9aFTuhMwhD47ydUFk=",
         "owner": "Denommus",
         "repo": "squads-multisig-client",
-        "rev": "a84a0f36b1c3eab6237982e8890d1ad1a0bb55f4",
+        "rev": "8ccb9d0ed2659a5edcc8667839b9d2b047c934a9",
         "type": "github"
       },
       "original": {

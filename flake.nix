@@ -39,6 +39,7 @@
 
           packages = [
             squads-multisig-client.packages.${system}.default
+            pkgs.cargo-machete
           ];
         };
       in

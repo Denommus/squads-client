@@ -4743,7 +4743,6 @@ dependencies = [
  "serde",
  "serde_with 3.11.0",
  "solana-client",
- "solana-program",
  "solana-sdk",
  "solana-transaction-status",
  "spl-memo",

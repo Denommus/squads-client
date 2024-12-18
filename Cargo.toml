@@ -9,7 +9,6 @@ clap = { version = "4.5.20", features = ["derive"] }
 serde = "1.0.215"
 serde_with = "3.11.0"
 solana-client = "1.18.26"
-solana-program = "1.18.26"
 solana-sdk = "1.18.26"
 solana-transaction-status = "1.18.26"
 spl-memo = { version = "4.0.0", features = ["no-entrypoint"] }
