@@ -11,7 +11,7 @@ squads-multisig-client \
 squads-multisig-client \
     --program-id GQGNGBWyWLQJHnnpxpNjd4qwqRK17Z3V6APS6ALee6KD \
     multisig-create \
-    --keypair config_initializer.json \
+    --keypair multisig_creator.json \
     --config-authority 5HTfiCkTRDJFHbuGS8b8hhYe8XMNv52ayKsh8TQRjZf1 \
     --threshold 2 \
     -m FV6iUdVw1gosWFFaqiq8iiUcqkHKZhfMFdMvhajtoxp6,7 \
